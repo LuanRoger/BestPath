@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "BestPath/1.0.0": {
+        "dependencies": {
+          "BenchmarkDotNet.Annotations": "0.13.8"
+        },
+        "runtime": {
+          "BestPath.dll": {}
+        }
+      },
+      "BenchmarkDotNet.Annotations/0.13.8": {
+        "runtime": {
+          "lib/netstandard2.0/BenchmarkDotNet.Annotations.dll": {
+            "assemblyVersion": "0.13.8.0",
+            "fileVersion": "0.13.8.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BestPath/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BenchmarkDotNet.Annotations/0.13.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ymeZAe2WIjjo6WZXdh7iWXX6ggn4EVJgfp0AVNGvQBTHhHr5HIY9zdTjuuk1qeGLZTPuxxpgk3vBAZO3huXBaQ==",
+      "path": "benchmarkdotnet.annotations/0.13.8",
+      "hashPath": "benchmarkdotnet.annotations.0.13.8.nupkg.sha512"
+    }
+  }
+}
