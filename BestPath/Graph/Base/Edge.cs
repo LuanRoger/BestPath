@@ -4,11 +4,11 @@ public abstract class Edge
 {
     public NodeRef to { get; }
     public NodeRef from { get; }
-    public uint wheight { get; }
+    public uint weight { get; }
     
-    public Edge(NodeRef from, NodeRef to, uint wheight = 0)
+    public Edge(NodeRef from, NodeRef to, uint weight = 0)
     {
-        this.wheight = wheight;
+        this.weight = weight;
         this.to = to;
         this.from = from;
     }

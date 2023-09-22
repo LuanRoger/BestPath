@@ -29,4 +29,19 @@ public abstract class Graph<N, E> where N : Node where E : Edge
     {
         edges.Add(edge);
     }
+    
+    protected N GetNode(NodeRef nodeRef)
+    {
+        return nodes[nodeRef.id];
+    }
+    
+    protected IEnumerable<N> GetDestinyNodes(NodeRef nodeRef) =>
+        edges
+            .FindAll(edge => edge.from.id == nodeRef.id)
+            .Select(edge => nodes[edge.to.id]);
+    
+    protected Dictionary<NodeRef, uint> GetNodesPath(NodeRef nodeRef) => 
+        edges
+        .FindAll(edge => edge.from.id == nodeRef.id)
+        .ToDictionary(edge => (NodeRef)nodes[edge.to.id], e => e.weight);
 }
