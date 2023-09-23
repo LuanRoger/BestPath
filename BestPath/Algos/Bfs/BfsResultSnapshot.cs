@@ -8,7 +8,7 @@ public class BfsResultSnapshot
     public required BfsNode meta { get; init; }
     public required Stack<NodeRef> path { get; init; }
     public required int expandedNodes { get; set; }
-    public float branchingFactor { get; set; }
+    public float branchingFactor => (float)expandedNodes / path.Count;
 
     public override string ToString()
     {

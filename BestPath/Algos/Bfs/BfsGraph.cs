@@ -37,12 +37,12 @@ public class BfsGraph : Graph<BfsNode, BfsEdge>
             }
         }
         
+        run = true;
         resultCache = new()
         {
             meta = result!,
             path = result is not null ? ConstructPath(result) : new(),
-            expandedNodes = expandedNodes,
-            branchingFactor = (float)expandedNodes / nodes.Count
+            expandedNodes = expandedNodes
         };
         return resultCache;
     }
