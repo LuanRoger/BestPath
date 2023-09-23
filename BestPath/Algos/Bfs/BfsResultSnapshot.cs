@@ -3,11 +3,12 @@ using BestPath.Graph.Base;
 
 namespace BestPath.Algos.Bfs;
 
-public class BfsResultSnapshot
+public class BfsResultSnapshot : IResultSnapshot
 {
     public required BfsNode meta { get; init; }
     public required Stack<NodeRef> path { get; init; }
-    public required int expandedNodes { get; set; }
+    public required TimeSpan elapsedTime { get; init; }
+    public required int expandedNodes { get; init; }
     public float branchingFactor => (float)expandedNodes / path.Count;
 
     public override string ToString()
@@ -18,6 +19,7 @@ public class BfsResultSnapshot
         builder.AppendLine(" ]");
         builder.AppendLine($"Expanded Nodes: {expandedNodes}");
         builder.AppendLine($"Branching Factor: {branchingFactor}");
+        builder.AppendLine($"Elapsed Time: {elapsedTime}");
         
         return builder.ToString();
     }

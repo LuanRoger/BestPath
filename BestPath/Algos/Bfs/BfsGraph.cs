@@ -1,17 +1,19 @@
+using System.Diagnostics;
 using BestPath.Graph.Base;
 
 namespace BestPath.Algos.Bfs;
 
-public class BfsGraph : Graph<BfsNode, BfsEdge>
+public class BfsGraph : Graph<BfsNode, BfsEdge>, IAlgorithmGraph
 {
-    private PriorityQueue<BfsNode, uint> queue { get; set; } = new();
+    private PriorityQueue<BfsNode, uint> queue { get; set; } = new(Comparer<uint>.Create((u, u1) => (int)(u1 - u)));
     private bool run { get; set; }
     private BfsResultSnapshot? resultCache { get; set; }
     
-    public BfsResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
+    public IResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
     {
         if(run)
             return resultCache!;
+        Stopwatch stopwatch = Stopwatch.StartNew();
         queue = new();
         BfsNode root = nodes[start.id];
         BfsNode? result = null;
@@ -21,7 +23,6 @@ public class BfsGraph : Graph<BfsNode, BfsEdge>
         while (queue.Count != 0)
         {
             NodeRef currentNode = (NodeRef)queue.Dequeue();
-            expandedNodes++;
             if(currentNode == goal)
             {
                 result = GetNode(currentNode);
@@ -35,19 +36,22 @@ public class BfsGraph : Graph<BfsNode, BfsEdge>
                 node.parent = currentNode;
                 queue.Enqueue(node, wieght);
             }
+            expandedNodes++;
         }
         
         run = true;
+        stopwatch.Stop();
         resultCache = new()
         {
             meta = result!,
             path = result is not null ? ConstructPath(result) : new(),
+            elapsedTime = stopwatch.Elapsed,
             expandedNodes = expandedNodes
         };
         return resultCache;
     }
-    
-    public Stack<NodeRef> ConstructPath(BfsNode goal)
+
+    private Stack<NodeRef> ConstructPath(BfsNode goal)
     {
         Stack<NodeRef> path = new();
         NodeRef? currentRef = (NodeRef)goal;
