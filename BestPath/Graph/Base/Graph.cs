@@ -16,7 +16,9 @@ public abstract class Graph<N, E> where N : Node where E : Edge
         this.edges = edges;
     }
     
-    public virtual NodeRef AddNode(N node)
+    public NodeRef GetSomeNodeRef(uint id) => (NodeRef)nodes[id];
+    
+    public NodeRef AddNode(N node)
     {
         bool isOnGraph = nodes.TryGetValue(node.id, out N? existingNode);
         if(isOnGraph) return new(existingNode!.id);
@@ -24,24 +26,26 @@ public abstract class Graph<N, E> where N : Node where E : Edge
         nodes.Add(node.id, node);
         return (NodeRef)node;
     }
+    
+    public void AddNodeRange(IEnumerable<N> nodes)
+    {
+        foreach (N node in nodes)
+            this.nodes.TryAdd(node.id, node);
+    }
 
-    public virtual void AddEdge(E edge)
-    {
-        edges.Add(edge);
-    }
+    public void AddEdge(E edge) => edges.Add(edge);
     
-    protected N GetNode(NodeRef nodeRef)
-    {
-        return nodes[nodeRef.id];
-    }
+    public void AddEdgeRange(IEnumerable<E> edges) => this.edges.AddRange(edges);
     
-    protected IEnumerable<N> GetDestinyNodes(NodeRef nodeRef) =>
+    protected N GetNode(NodeRef nodeRef) => nodes[nodeRef.id];
+    
+    protected IEnumerable<N> GetAdjacentNodes(NodeRef nodeRef) =>
         edges
-            .FindAll(edge => edge.from.id == nodeRef.id)
-            .Select(edge => nodes[edge.to.id]);
+            .FindAll(edge => edge.from == nodeRef.id)
+            .Select(edge => nodes[edge.to]);
     
-    protected Dictionary<NodeRef, uint> GetNodesPath(NodeRef nodeRef) => 
+    protected IEnumerable<(NodeRef, uint)> GetNodesPath(NodeRef nodeRef) => 
         edges
-        .FindAll(edge => edge.from.id == nodeRef.id)
-        .ToDictionary(edge => (NodeRef)nodes[edge.to.id], e => e.weight);
+        .FindAll(edge => edge.from == nodeRef.id)
+        .Select(edge => ((NodeRef)nodes[edge.to], edge.weight));
 }
