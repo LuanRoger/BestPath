@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "v3Je6GykjZFxeEni4pX38VI/+KEftUhzr8gZ6wQWS0eUlVHrCWulx5r8AmJdYk8Nwiz3WuriqkYsvC2E4N2NVw==",
+  "dgSpecHash": "rm6M05i9JHrs3SAViwheExlVhtZZHLmbHMMJ1CRcFtOpzZw8XZlT6Pfe9mtXPAW2sG1n4/LR0k0p74bBVdzvWg==",
   "success": true,
   "projectFilePath": "C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath.Benchmark\\BestPath.Benchmark.csproj",
   "expectedPackageFiles": [
@@ -28,10 +28,11 @@
     "C:\\Users\\luanr\\.nuget\\packages\\microsoft.netcore.platforms\\5.0.0\\microsoft.netcore.platforms.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\perfolizer\\0.2.1\\perfolizer.0.2.1.nupkg.sha512",
+    "C:\\Users\\luanr\\.nuget\\packages\\spectre.console\\0.47.0\\spectre.console.0.47.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.codedom\\5.0.0\\system.codedom.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.collections.immutable\\5.0.0\\system.collections.immutable.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.management\\5.0.0\\system.management.5.0.0.nupkg.sha512",
-    "C:\\Users\\luanr\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512",
+    "C:\\Users\\luanr\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.reflection.metadata\\5.0.0\\system.reflection.metadata.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\5.0.0\\system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512",
     "C:\\Users\\luanr\\.nuget\\packages\\system.security.accesscontrol\\5.0.0\\system.security.accesscontrol.5.0.0.nupkg.sha512",

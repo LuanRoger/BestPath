@@ -116,6 +116,22 @@
             "BenchmarkDotNet.Annotations": {
               "target": "Package",
               "version": "[0.13.8, )"
+            },
+            "Microsoft.DotNet.ILCompiler": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0-rc.1.23419.4, )",
+              "autoReferenced": true
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0-rc.1.23419.4, )",
+              "autoReferenced": true
+            },
+            "Spectre.Console": {
+              "target": "Package",
+              "version": "[0.47.0, )"
             }
           },
           "imports": [
@@ -129,6 +145,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "runtime.win-x64.Microsoft.DotNet.ILCompiler",
+              "version": "[8.0.0-rc.1.23419.4, 8.0.0-rc.1.23419.4]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
