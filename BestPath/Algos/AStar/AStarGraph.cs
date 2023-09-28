@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using BestPath.Algos.AStar.Heuristics;
 using BestPath.Graph.Base;
 
 namespace BestPath.Algos.AStar;
@@ -9,7 +10,11 @@ public class AStarGraph : Graph<AStarNode, AStarEdge>, IAlgorithmGraph
         new(Comparer<uint>.Create((u, u1) => (int)(u1 - u)));
     private bool run { get; set; }
     private AStarResultSnapshot? resultCache { get; set; }
-    
+
+    public string algorithmName => "A*";
+    public event IAlgorithmGraph.OnFinishEventHandler? OnFinish;
+    private IAStarHeuristic heuristic { get; set; } = new FlatEarthHeuristic();
+
     public IResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
     {
         if(run)
@@ -37,7 +42,7 @@ public class AStarGraph : Graph<AStarNode, AStarEdge>, IAlgorithmGraph
                 node.visited = true;
                 node.parent = currentNode;
                 
-                node.CalcualteDistance(goalNode, out double heuristicValue);
+                double heuristicValue = heuristic.CalculateHeuristicValue(node, goalNode);
                 uint priority = (uint)(heuristicValue + wieght);
                 queue.Enqueue(node, priority);
             }
@@ -53,8 +58,15 @@ public class AStarGraph : Graph<AStarNode, AStarEdge>, IAlgorithmGraph
             elapsedTime = stopwatch.Elapsed,
             expandedNodes = expandedNodes
         };
+        OnFinish?.Invoke(this, new()
+        {
+            elapsedTime = stopwatch.Elapsed
+        });
         return resultCache;
     }
+
+    public IResultSnapshot RunAlgo(uint nodeFrom, uint nodeTo) => 
+        RunAlgo(GetSomeNodeRef(nodeFrom), GetSomeNodeRef(nodeTo));
 
     private Stack<NodeRef> ConstructPath(AStarNode goal)
     {
@@ -68,5 +80,13 @@ public class AStarGraph : Graph<AStarNode, AStarEdge>, IAlgorithmGraph
         }
         
         return path;
+    }
+    
+    public void Heuristic(IAStarHeuristic newHeuristic) => heuristic = newHeuristic;
+    
+    public void CleanResult()
+    {
+        run = false;
+        resultCache = null;
     }
 }
