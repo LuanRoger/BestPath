@@ -1,14 +1,14 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 using BestPath.Graph.Base;
 
 namespace BestPath.Algos.Dfs;
 
-public record DfsResultSnapshot
+public record DfsResultSnapshot : IResultSnapshot
 {
     public required Stack<NodeRef> path { get; init; }
+    public TimeSpan elapsedTime { get; init; }
     public required int steps { get; init; }
-    public required int expandedNodes { get; set; }
+    public required int expandedNodes { get; init; }
 
     public float branchingFactor => (float)expandedNodes / path.Count;
 

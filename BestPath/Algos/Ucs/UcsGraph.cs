@@ -8,7 +8,10 @@ public class UcsGraph : Graph<UcsNode, UcsEdge>, IAlgorithmGraph
     private PriorityQueue<UcsNode, int> queue { get; set; } = new(Comparer<int>.Create((u, u1) => u1 - u));
     private bool run { get; set; }
     private UcsResultSnapshot? resultCache { get; set; }
-    
+
+    public string algorithmName => "UCS";
+    public event IAlgorithmGraph.OnFinishEventHandler? OnFinish;
+
     public IResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
     {
         if(run)
@@ -50,8 +53,15 @@ public class UcsGraph : Graph<UcsNode, UcsEdge>, IAlgorithmGraph
             elapsedTime = stopwatch.Elapsed,
             expandedNodes = expandedNodes
         };
+        OnFinish?.Invoke(this, new()
+        {
+            elapsedTime = stopwatch.Elapsed
+        });
         return resultCache;
     }
+
+    public IResultSnapshot RunAlgo(uint nodeFrom, uint nodeTo) => 
+        RunAlgo(GetSomeNodeRef(nodeFrom), GetSomeNodeRef(nodeTo));
 
     private Stack<NodeRef> ConstructPath(UcsNode goal)
     {

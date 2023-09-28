@@ -1,5 +1,4 @@
 using BestPath.Graph.Base;
-using BestPath.Models;
 
 namespace BestPath.Algos.Bfs;
 

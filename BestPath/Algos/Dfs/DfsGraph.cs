@@ -1,18 +1,23 @@
-﻿using BestPath.Algos.Dfs.Enums;
+﻿using System.Diagnostics;
+using BestPath.Algos.Dfs.Enums;
 using BestPath.Graph.Base;
 
 namespace BestPath.Algos.Dfs;
 
-public class DfsGraph : Graph<DfsNode, DfsEdge>
+public class DfsGraph : Graph<DfsNode, DfsEdge>, IAlgorithmGraph
 {
     private bool run { get; set; }
     private DfsResultSnapshot? resultCache { get; set; }
-    
-    public DfsResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
+
+    public string algorithmName => "DFS";
+    public event IAlgorithmGraph.OnFinishEventHandler? OnFinish;
+
+    public IResultSnapshot RunAlgo(NodeRef start, NodeRef goal)
     {
         if(run)
             return resultCache!;
         
+        Stopwatch stopwatch = Stopwatch.StartNew();
         Stack<NodeRef> stack = new();
         int mark = 0;
         int expandedNodes = 0; 
@@ -49,15 +54,19 @@ public class DfsGraph : Graph<DfsNode, DfsEdge>
         CreateResultSnapshot:
         
         run = true;
+        stopwatch.Stop();
         resultCache = new()
         {
             steps = mark,
             expandedNodes = expandedNodes,
-            path = path
+            path = path,
+            elapsedTime = stopwatch.Elapsed
         };
         
         return resultCache;
     }
+    public IResultSnapshot RunAlgo(uint nodeFrom, uint nodeTo) =>
+        RunAlgo(new(nodeFrom), new NodeRef(nodeTo));
     
     public void Reset()
     {
