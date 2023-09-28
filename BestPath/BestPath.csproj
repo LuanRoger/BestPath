@@ -10,9 +10,12 @@
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.8" />
+      <PackageReference Include="Spectre.Console" Version="0.47.0" />
+
     </ItemGroup>
-
-
-
-
+    
+    <PropertyGroup>
+        <PublishAot>true</PublishAot>
+    </PropertyGroup>
+    
 </Project>
