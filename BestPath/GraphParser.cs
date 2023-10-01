@@ -1,5 +1,6 @@
 using BestPath.Algos.AStar;
 using BestPath.Algos.Bfs;
+using BestPath.Algos.Dfs;
 using BestPath.Algos.Ucs;
 using BestPath.Models;
 
@@ -28,8 +29,23 @@ public class GraphParser
         
         await Task.WhenAll(coordnatesTask, distanceTask);
         
-        graph.AddNodeRange(await coordnatesTask);
-        graph.AddEdgeRange(await distanceTask);
+        graph.AddNodeRange(coordnatesTask.Result);
+        graph.AddEdgeRange(distanceTask.Result);
+        
+        return graph;
+    }
+    
+    public async Task<DfsGraph> ParseToDfsGraph()
+    {
+        DfsGraph graph = new();
+        
+        var coordnatesTask = ParseCoordinatesAsDfsNodes();
+        var distanceTask = ParseDistanceAsDfsEdges();
+        
+        await Task.WhenAll(coordnatesTask, distanceTask);
+        
+        graph.AddNodeRange(coordnatesTask.Result);
+        graph.AddEdgeRange(distanceTask.Result);
         
         return graph;
     }
@@ -43,8 +59,8 @@ public class GraphParser
         
         await Task.WhenAll(coordnatesTask, distanceTask);
         
-        graph.AddNodeRange(await coordnatesTask);
-        graph.AddEdgeRange(await distanceTask);
+        graph.AddNodeRange(coordnatesTask.Result);
+        graph.AddEdgeRange(distanceTask.Result);
         
         return graph;
     }
@@ -58,8 +74,8 @@ public class GraphParser
         
         await Task.WhenAll(coordnatesTask, distanceTask);
         
-        graph.AddNodeRange(await coordnatesTask);
-        graph.AddEdgeRange(await distanceTask);
+        graph.AddNodeRange(coordnatesTask.Result);
+        graph.AddEdgeRange(distanceTask.Result);
         
         return graph;
     }
@@ -67,6 +83,29 @@ public class GraphParser
     private async Task<IEnumerable<BfsNode>> ParseCoordinatesAsBfsNodes()
     {
         List<BfsNode> nodes = new();
+        
+        await using FileStream fileStream = File.OpenRead(coordinatesFilePath);
+        await using BufferedStream bufferedStream = new(fileStream);
+        using StreamReader streamReader = new(bufferedStream);
+
+        while (true)
+        {
+            string? line = await streamReader.ReadLineAsync();
+            if (line is null) break;
+            if (!line.StartsWith(COORDINATES_INDICATOR)) continue;
+            
+            string[] lineData = line.Split(" ");
+            uint id = uint.Parse(lineData[1]);
+            
+            nodes.Add(new(id));
+        }
+        
+        return nodes;
+    }
+    
+    private async Task<IEnumerable<DfsNode>> ParseCoordinatesAsDfsNodes()
+    {
+        List<DfsNode> nodes = new();
         
         await using FileStream fileStream = File.OpenRead(coordinatesFilePath);
         await using BufferedStream bufferedStream = new(fileStream);
@@ -138,6 +177,31 @@ public class GraphParser
     private async Task<IEnumerable<BfsEdge>> ParseDistanceAsBfsEdges()
     {
         List<BfsEdge> edges = new();
+        
+        await using FileStream fileStream = File.OpenRead(distanceFilePath);
+        await using BufferedStream bufferedStream = new(fileStream);
+        using StreamReader streamReader = new(bufferedStream);
+
+        while (true)
+        {
+            string? line = await streamReader.ReadLineAsync();
+            if (line is null) break;
+            if (!line.StartsWith(DISTANCE_INDICATOR)) continue;
+            
+            string[] lineData = line.Split(" ");
+            uint fromId = uint.Parse(lineData[1]);
+            uint toId = uint.Parse(lineData[2]);
+            uint weight = uint.Parse(lineData[3]);
+            
+            edges.Add(new(fromId, toId, weight));
+        }
+        
+        return edges;
+    }
+    
+    private async Task<IEnumerable<DfsEdge>> ParseDistanceAsDfsEdges()
+    {
+        List<DfsEdge> edges = new();
         
         await using FileStream fileStream = File.OpenRead(distanceFilePath);
         await using BufferedStream bufferedStream = new(fileStream);

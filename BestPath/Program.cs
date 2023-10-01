@@ -1,59 +1,176 @@
-﻿using BestPath;
+﻿using System.Globalization;
+using BestPath;
+using BestPath.Algos;
 using BestPath.Algos.AStar;
-using BestPath.Algos.Bfs;
-using BestPath.Algos.Ucs;
-using BestPath.Graph.Base;
+using BestPath.Algos.AStar.Heuristics;
+using BestPath.Models.EventArgs;
+using Spectre.Console;
 
-Console.WriteLine("Lendo grafo...");
-var aStarParseTask = ReadAStarGraph();
-var bfsParseTask = ReadBfsGraph();
-var ucsParseTask = ReadUcsGraph();
-await Task.WhenAll(aStarParseTask, ucsParseTask);
-Console.WriteLine("Grafo lido!");
+GraphInputs graphInputs = new();
+string location = AnsiConsole.Prompt(new SelectionPrompt<string>()
+    .Title("Selecione uma [bold]localização[/] dos EUA:")
+    .AddChoices(graphInputs.locations));
+(string coordinatesFile, string distanceFile) = graphInputs.GetLocationFiles(location);
 
-AStarGraph aStarGraph = aStarParseTask.Result; 
-BfsGraph bfsGraph = bfsParseTask.Result;
-UcsGraph ucsGraph = ucsParseTask.Result;
-GC.Collect();
+uint startNodeId = AnsiConsole.Prompt(
+    new TextPrompt<uint>("Digite o ID do [cyan]nó de origem[/]:")
+        .ValidationErrorMessage("[red]Nó não encontrado![/]"));
+uint goalNodeId = AnsiConsole.Prompt(
+    new TextPrompt<uint>("Digite o ID do nó de destino:")
+        .ValidationErrorMessage("Nó não encontrado!"));
 
-NodeRef nodeFromAStar = aStarGraph.GetSomeNodeRef(89);
-NodeRef nodeToAStar = aStarGraph.GetSomeNodeRef(27);
-NodeRef nodeFromBfs = bfsGraph.GetSomeNodeRef(89);
-NodeRef nodeToBfs = bfsGraph.GetSomeNodeRef(27);
-NodeRef nodeFromUcs = ucsGraph.GetSomeNodeRef(89);
-NodeRef nodeToUcs = ucsGraph.GetSomeNodeRef(27);
+bool runSync = AnsiConsole
+    .Confirm("Deseja executar os algoritimos de forma [bold]sincrona[/]?");
 
+Table algorithmsTable = new Table()
+    .BorderColor(Color.Navy)
+    .Title("Algoritimos que serão executados.");
+algorithmsTable.AddColumn("Algoritimo");
+algorithmsTable.AddColumn("Origem");
+algorithmsTable.AddColumn("Destino");
+algorithmsTable.AddRow("DFS", startNodeId.ToString(), goalNodeId.ToString());
+algorithmsTable.AddRow("BFS", startNodeId.ToString(), goalNodeId.ToString());
+algorithmsTable.AddRow("UCS", startNodeId.ToString(), goalNodeId.ToString());
+algorithmsTable.AddRow("A*", startNodeId.ToString(), goalNodeId.ToString());
+AnsiConsole.Write(algorithmsTable);
 
-Console.WriteLine("Executando algoritmos...");
-var bfsAlgo = Task.Run(() => bfsGraph.RunAlgo(nodeFromBfs, nodeToBfs));
-var ucsAlgo = Task.Run(() => ucsGraph.RunAlgo(nodeFromUcs, nodeToUcs));
-var aStarAlgo = Task.Run(() => aStarGraph.RunAlgo(nodeFromAStar, nodeToAStar));
-await Task.WhenAll(aStarAlgo, ucsAlgo);
+GraphParser graphParser = new(coordinatesFile, distanceFile);
+var graphs = GetGraphsGenerator();
+List<IAlgorithmGraph> algorithmGraphs = new();
+List<IResultSnapshot> results = new();
+await AnsiConsole.Status()
+    .Spinner(Spinner.Known.Earth)
+    .StartAsync("Executando algoritimos...", GenerateGraphs);
+await AnsiConsole.Progress()
+    .Columns(new TaskDescriptionColumn(),
+        new ProgressBarColumn(),
+        new SpinnerColumn(Spinner.Known.Earth),
+        new ElapsedTimeColumn())
+    .StartAsync(context => RunAlgos(context, runSync));
+
 Console.WriteLine("Algoritmos executados!");
 
-Console.WriteLine("Resultado do A*: ");
-Console.WriteLine(aStarAlgo.Result);
-Console.WriteLine("Resultado do BFS: ");
-Console.WriteLine(bfsAlgo.Result);
-Console.WriteLine("Resultado UCS: ");
-Console.WriteLine(ucsAlgo.Result);
+foreach (IResultSnapshot result in results)
+    PrintAlgoResult(result);
 
 return;
 
-async Task<BfsGraph> ReadBfsGraph()
+async IAsyncEnumerable<IAlgorithmGraph> GetGraphsGenerator()
 {
-    GraphParser graphParser = new(@"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-coordinates", @"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-distance");
-    return await graphParser.ParseToBfsGraph();
+    yield return await graphParser.ParseToAStarGraph();
+    yield return await graphParser.ParseToBfsGraph();
+    yield return await graphParser.ParseToUcsGraph();
+    yield return await graphParser.ParseToDfsGraph();
 }
 
-async Task<AStarGraph> ReadAStarGraph()
+async Task GenerateGraphs(StatusContext context)
 {
-    GraphParser graphParser = new(@"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-coordinates", @"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-distance");
-    return await graphParser.ParseToAStarGraph();
+    context.Spinner(Spinner.Known.Circle);
+    context.Status("[cyan]Gerando grafos...[/]");
+    await foreach(IAlgorithmGraph? graph in graphs)
+    {
+        AnsiConsole.MarkupLine($"[springgreen1]Grafo {graph.algorithmName} gerado![/]");
+        algorithmGraphs.Add(graph);
+    }
+    AnsiConsole.MarkupLine("[green]Grafos gerados![/]");
+    context.Spinner(Spinner.Known.Earth);
+    context.Status("[cyan]Executando algoritimos...[/]");
 }
 
-async Task<UcsGraph> ReadUcsGraph()
+async Task RunAlgos(ProgressContext context, bool runAlgoSync)
 {
-    GraphParser graphParser = new(@"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-coordinates", @"C:\\Users\\luanr\\Documents\\Jobs\\c_sharp\\BestPath\\BestPath\\inputs\\ny\\USA-ny-distance");
-    return await graphParser.ParseToUcsGraph();
+    CancellationTokenSource cancellationTokenSource = new();
+    List<ProgressTask> tasksProgress = new();
+    var tasks = algorithmGraphs.Select(algo =>
+    {
+        ProgressTask progress = context.AddTask($"[cyan]{algo.algorithmName}[/]");
+        tasksProgress.Add(progress);
+        return Task.Run(() =>
+        {
+            switch(algo)
+            {
+                case AStarGraph aStarGraph:
+                    RunAStarGraphAlgo(aStarGraph, progress);
+                    break;
+                default:
+                    RunRegularAlgorithm(algo, ref progress);
+                    break;
+            };
+        }).WaitAsync(cancellationTokenSource.Token);
+    });
+    
+    try
+    {
+        TimeSpan cancelationTime = TimeSpan.FromMinutes(15);
+        const int factor = 4;
+        cancelationTime = runAlgoSync ? cancelationTime.Multiply(factor) : cancelationTime;
+        cancellationTokenSource.CancelAfter(cancelationTime);
+        
+        if(runAlgoSync)
+            foreach(Task task in tasks)
+                await task;
+        else await Task.WhenAll(tasks);
+    }
+    catch(OperationCanceledException)
+    {
+        AnsiConsole.MarkupLine("[red]Tempo esgotado.[/]");
+    }
+    finally
+    {
+        foreach (ProgressTask prog in tasksProgress)
+            prog.StopTask();
+    }
+    
+    return;
+    void Finish(object sender, AlgosPartialResultSnapshotEventArgs eventArgs)
+    {
+        AnsiConsole.MarkupLine($"[purple]{sender.GetType()} encerrado:[/] [green]{eventArgs.elapsedTime}[/]");
+    }
+    void RunRegularAlgorithm(IAlgorithmGraph algo, ref ProgressTask progress)
+    {
+        progress.IsIndeterminate();
+        algo.OnFinish += Finish;
+        IResultSnapshot resultSnapshot = algo.RunAlgo(startNodeId, goalNodeId);
+        progress.Increment(100);
+        progress.StopTask();
+        results.Add(resultSnapshot);
+    }
+    void RunAStarGraphAlgo(AStarGraph graph, ProgressTask progress)
+    {
+        graph.OnFinish += Finish;
+        IResultSnapshot flatEarthResult = graph.RunAlgo(startNodeId, goalNodeId);
+        results.Add(flatEarthResult);
+        progress.Increment(30);
+        AnsiConsole.MarkupLine("[springgreen1]Heuristica da terra-plana concluida[/]");
+        
+        /*AnsiConsole.MarkupLine("[cyan]Reiniciando grafo...[/]");
+        graph = await graphParser.ParseToAStarGraph();
+        
+        progress.Increment(20);
+        graph.Heuristic(new HaversineHeuristic());
+        AnsiConsole.MarkupLine("[blue]Iniciando a heuristica de Haversine[/]");
+        IResultSnapshot haversineResult = graph.RunAlgo(startNodeId, goalNodeId);
+        results.Add(haversineResult);*/
+        
+        progress.Increment(100);
+        progress.StopTask();
+    }
+}
+
+void PrintAlgoResult(IResultSnapshot resultSnapshot)
+{
+    Table resultTable = new Table()
+        .Title(resultSnapshot.algoSource)
+        .Border(TableBorder.Rounded)
+        .BorderColor(Color.Aqua);
+        
+    resultTable.AddColumn("Tempo de execução");
+    resultTable.AddColumn("Nós expandidos");
+    resultTable.AddColumn("Fator de ramificação");
+        
+    resultTable.AddRow(resultSnapshot.elapsedTime.ToString(), 
+        resultSnapshot.expandedNodes.ToString(), 
+        resultSnapshot.branchingFactor.ToString(CultureInfo.CurrentCulture));
+    
+    AnsiConsole.Write(resultTable);
 }

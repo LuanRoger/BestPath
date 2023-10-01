@@ -16,6 +16,4 @@ public abstract class Node
     }
     
     public static explicit operator NodeRef(Node node) => new(node.id);
-    public static bool operator ==(Node node, NodeRef nodeRef) => node.id == nodeRef.id;
-    public static bool operator !=(Node node, NodeRef nodeRef) => node.id != nodeRef.id;
 }

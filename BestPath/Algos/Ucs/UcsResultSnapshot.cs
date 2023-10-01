@@ -5,10 +5,11 @@ namespace BestPath.Algos.Ucs;
 
 public class UcsResultSnapshot : IResultSnapshot
 {
+    public required string algoSource { get; init; }
     public Stack<NodeRef> path { get; init; }
     public TimeSpan elapsedTime { get; init; }
     public int expandedNodes { get; init; }
-    public float branchingFactor => (float)expandedNodes / path.Count;
+    public required float branchingFactor { get; init; }
 
     public override string ToString()
     {

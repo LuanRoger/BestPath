@@ -5,11 +5,11 @@ namespace BestPath.Algos.Bfs;
 
 public class BfsResultSnapshot : IResultSnapshot
 {
-    public required BfsNode meta { get; init; }
+    public required string algoSource { get; init; }
     public required Stack<NodeRef> path { get; init; }
     public required TimeSpan elapsedTime { get; init; }
     public required int expandedNodes { get; init; }
-    public float branchingFactor => (float)expandedNodes / path.Count;
+    public required float branchingFactor { get; init; }
 
     public override string ToString()
     {
