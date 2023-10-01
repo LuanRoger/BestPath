@@ -20,7 +20,8 @@ public class DfsGraph : Graph<DfsNode, DfsEdge>, IAlgorithmGraph
         Stopwatch stopwatch = Stopwatch.StartNew();
         Stack<NodeRef> stack = new();
         int mark = 0;
-        int expandedNodes = 0; 
+        int expandedNodes = 0;
+        int childrenFounded = 0;
         Stack<NodeRef> path = new();
         
         stack.Push(start);
@@ -30,12 +31,14 @@ public class DfsGraph : Graph<DfsNode, DfsEdge>, IAlgorithmGraph
             DfsNode currentNode = GetNode(currentNodeRef);
             if (currentNode.color != Color.White) continue;
             
-            currentNode.color = Color.Gray;
             mark++;
+            currentNode.color = Color.Gray;
             currentNode.grayAt = mark;
             path.Push(currentNodeRef);
             
-            foreach (DfsNode adjacentNode in GetAdjacentNodes(currentNodeRef))
+            var adjacents = GetAdjacentNodes(currentNodeRef).ToList();
+            childrenFounded += adjacents.Count;
+            foreach (DfsNode adjacentNode in adjacents)
             {
                 NodeRef adjacentNodeRef = (NodeRef)adjacentNode;
                 if(adjacentNodeRef == goal)
@@ -46,10 +49,10 @@ public class DfsGraph : Graph<DfsNode, DfsEdge>, IAlgorithmGraph
                 stack.Push(adjacentNodeRef);
             }
             
-            currentNode.color = Color.Black;
             mark++;
-            currentNode.blackAt = mark;
             expandedNodes++;
+            currentNode.color = Color.Black;
+            currentNode.blackAt = mark;
         }
         CreateResultSnapshot:
         
@@ -57,20 +60,16 @@ public class DfsGraph : Graph<DfsNode, DfsEdge>, IAlgorithmGraph
         stopwatch.Stop();
         resultCache = new()
         {
+            algoSource = algorithmName,
             steps = mark,
             expandedNodes = expandedNodes,
             path = path,
-            elapsedTime = stopwatch.Elapsed
+            elapsedTime = stopwatch.Elapsed,
+            branchingFactor = childrenFounded / (float)expandedNodes
         };
         
         return resultCache;
     }
     public IResultSnapshot RunAlgo(uint nodeFrom, uint nodeTo) =>
         RunAlgo(new(nodeFrom), new NodeRef(nodeTo));
-    
-    public void Reset()
-    {
-        run = false;
-        resultCache = null;
-    }
 }

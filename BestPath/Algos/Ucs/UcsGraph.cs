@@ -21,18 +21,17 @@ public class UcsGraph : Graph<UcsNode, UcsEdge>, IAlgorithmGraph
         UcsNode root = nodes[start.id];
         UcsNode? result = null;
         int expandedNodes = 0;
+        int childrenFounded = 0;
         root.visited = true;
         queue.Enqueue(root, 0);
         while (queue.Count != 0)
         {
             UcsNode currentNode = queue.Dequeue();
             NodeRef currentNodeRef = (NodeRef)currentNode;
-            if(currentNodeRef == goal)
-            {
-                result = GetNode(currentNodeRef);
-                break;
-            }
-            foreach ((NodeRef nodeRef, uint wieght) in GetNodesPath(currentNodeRef))
+            
+            var children = GetNodesPath(currentNodeRef).ToList();
+            childrenFounded += children.Count;
+            foreach ((NodeRef nodeRef, uint wieght) in children)
             {
                 UcsNode node = GetNode(nodeRef);
                 if (node.visited) continue;
@@ -40,18 +39,26 @@ public class UcsGraph : Graph<UcsNode, UcsEdge>, IAlgorithmGraph
                 node.visited = true;
                 node.parent = currentNodeRef;
                 node.sum = sum;
+                if(nodeRef == goal)
+                {
+                    result = GetNode(currentNodeRef);
+                    goto ComputeResult;
+                }
                 queue.Enqueue(node, sum);
             }
             expandedNodes++;
         }
+        ComputeResult:
         
         run = true;
         stopwatch.Stop();
         resultCache = new()
         {
+            algoSource = algorithmName,
             path = result is not null ? ConstructPath(result) : new(),
             elapsedTime = stopwatch.Elapsed,
-            expandedNodes = expandedNodes
+            expandedNodes = expandedNodes,
+            branchingFactor = childrenFounded / (float)expandedNodes
         };
         OnFinish?.Invoke(this, new()
         {
@@ -66,12 +73,12 @@ public class UcsGraph : Graph<UcsNode, UcsEdge>, IAlgorithmGraph
     private Stack<NodeRef> ConstructPath(UcsNode goal)
     {
         Stack<NodeRef> path = new();
-        NodeRef? currentRef = (NodeRef)goal;
-        while (currentRef is not null)
+        NodeRef currentRef = (NodeRef)goal;
+        while (currentRef != default)
         {
             path.Push(currentRef);
             UcsNode current = GetNode(currentRef);
-            currentRef = current.parent;
+            currentRef = current.parent ?? default;
         }
         
         return path;
