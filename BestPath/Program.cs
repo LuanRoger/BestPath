@@ -85,12 +85,12 @@ async Task RunAlgos(ProgressContext context, bool runAlgoSync)
     {
         ProgressTask progress = context.AddTask($"[cyan]{algo.algorithmName}[/]");
         tasksProgress.Add(progress);
-        return Task.Run(() =>
+        return Task.Run(async () =>
         {
             switch(algo)
             {
                 case AStarGraph aStarGraph:
-                    RunAStarGraphAlgo(aStarGraph, progress);
+                    await RunAStarGraphAlgo(aStarGraph, progress);
                     break;
                 default:
                     RunRegularAlgorithm(algo, ref progress);
@@ -135,7 +135,7 @@ async Task RunAlgos(ProgressContext context, bool runAlgoSync)
         progress.StopTask();
         results.Add(resultSnapshot);
     }
-    void RunAStarGraphAlgo(AStarGraph graph, ProgressTask progress)
+    async Task RunAStarGraphAlgo(AStarGraph graph, ProgressTask progress)
     {
         graph.OnFinish += Finish;
         IResultSnapshot flatEarthResult = graph.RunAlgo(startNodeId, goalNodeId);
@@ -143,14 +143,14 @@ async Task RunAlgos(ProgressContext context, bool runAlgoSync)
         progress.Increment(30);
         AnsiConsole.MarkupLine("[springgreen1]Heuristica da terra-plana concluida[/]");
         
-        /*AnsiConsole.MarkupLine("[cyan]Reiniciando grafo...[/]");
+        AnsiConsole.MarkupLine("[cyan]Reiniciando grafo...[/]");
         graph = await graphParser.ParseToAStarGraph();
         
         progress.Increment(20);
         graph.Heuristic(new HaversineHeuristic());
         AnsiConsole.MarkupLine("[blue]Iniciando a heuristica de Haversine[/]");
         IResultSnapshot haversineResult = graph.RunAlgo(startNodeId, goalNodeId);
-        results.Add(haversineResult);*/
+        results.Add(haversineResult);
         
         progress.Increment(100);
         progress.StopTask();

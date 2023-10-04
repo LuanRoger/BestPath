@@ -8,23 +8,15 @@ public class HaversineHeuristic : IAStarHeuristic
     {
         if(currentNode.data is null || goalNode.data is null) return 0;
         
-        Coordinate originCoordinate = (Coordinate)currentNode.data; 
-        Coordinate destinyCoordinate = (Coordinate)goalNode.data;
-        double latitudeOrigen = originCoordinate.y;
-        double longitudeOrigen = originCoordinate.x;
-        double latitudeDestiny = destinyCoordinate.y;
-        double longitudeDestiny = destinyCoordinate.x;
+        const double radius = 6378100;
+        Coordinate thisCoordinate = (Coordinate) currentNode.data;
+        Coordinate toCoordinate = (Coordinate) goalNode.data;
+        
+        double sdlat = Math.Sin((toCoordinate.y - thisCoordinate.y) / 2.0d);
+        double sdlon = Math.Sin((toCoordinate.x - thisCoordinate.x) / 2.0d);
+        double q = sdlat * sdlat + Math.Cos(toCoordinate.y) * Math.Cos(thisCoordinate.y) * sdlon * sdlon;
+        double d = 2 * radius * Math.Asin(Math.Sqrt(q));
 
-        const double R = 6371.01;
-
-        double deltaLatitude = latitudeDestiny - latitudeOrigen;
-        double deltaLongitude = longitudeDestiny - longitudeOrigen;
-
-        double a = Math.Pow(Math.Sin(deltaLatitude / 2.0), 2) + Math.Cos(latitudeOrigen) * Math.Cos(latitudeDestiny) * Math.Pow(Math.Sin(deltaLongitude / 2.0), 2);
-        double c = 2 * Math.Asin(Math.Sqrt(a));
-
-        double distancia = R * c;
-
-        return distancia;
+        return d;
     }
 }

@@ -165,8 +165,8 @@ public class GraphParser
             
             string[] lineData = line.Split(" ");
             uint id = uint.Parse(lineData[1]);
-            int x = int.Parse(lineData[2]);
-            int y = int.Parse(lineData[3]);
+            int x = int.Parse(lineData[3]) / 1000000;
+            int y = int.Parse(lineData[2]) / 1000000;
             
             nodes.Add(new(id, new Coordinate(x, y)));
         }
