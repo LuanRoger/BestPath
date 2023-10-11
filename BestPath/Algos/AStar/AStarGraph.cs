@@ -92,5 +92,6 @@ public class AStarGraph : Graph<AStarNode, AStarEdge>, IAlgorithmGraph
     {
         run = false;
         resultCache = null;
+        OnFinish = null;
     }
 }

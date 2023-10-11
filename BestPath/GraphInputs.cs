@@ -8,8 +8,8 @@ public class GraphInputs
     private const string WEST_COORDINATES = @".\inputs\west\USA-west-coordinates";
     private const string WEST_DISTANCE = @".\inputs\west\USA-west-distance";
     
-    private const string EAST_COORDINATES = @".\inputs\eastern\USA-east-coordinates";
-    private const string EAST_DISTANCE = @".\inputs\eastern\USA-east-distance";
+    private const string EAST_COORDINATES = @".\inputs\eastern\USA-eastern-coordinates";
+    private const string EAST_DISTANCE = @".\inputs\eastern\USA-eastern-distance";
     
     private const string CENTER_COORDINATES = @".\inputs\center\USA-center-coordinates";
     private const string CENTER_DISTANCE = @".\inputs\center\USA-center-distance";

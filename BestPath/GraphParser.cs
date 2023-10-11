@@ -65,11 +65,11 @@ public class GraphParser
         return graph;
     }
     
-    public async Task<AStarGraph> ParseToAStarGraph()
+    public async Task<AStarGraph> ParseToAStarGraph(bool divideByMillion = true)
     {
         AStarGraph graph = new();
         
-        var coordnatesTask = ParseCoordinatesAsAStarNodes();
+        var coordnatesTask = ParseCoordinatesAsAStarNodes(divideByMillion);
         var distanceTask = ParseDistanceAsAStarEdges();
         
         await Task.WhenAll(coordnatesTask, distanceTask);
@@ -149,7 +149,7 @@ public class GraphParser
         return nodes;
     }
     
-    private async Task<IEnumerable<AStarNode>> ParseCoordinatesAsAStarNodes()
+    private async Task<IEnumerable<AStarNode>> ParseCoordinatesAsAStarNodes(bool divideByMillion = true)
     {
         List<AStarNode> nodes = new();
         
@@ -165,8 +165,8 @@ public class GraphParser
             
             string[] lineData = line.Split(" ");
             uint id = uint.Parse(lineData[1]);
-            float x = float.Parse(lineData[3]) / 1000000;
-            float y = float.Parse(lineData[2]) / 1000000;
+            float x = divideByMillion ? float.Parse(lineData[3]) / 1000000 : float.Parse(lineData[3]);
+            float y = divideByMillion ? float.Parse(lineData[2]) / 1000000 : float.Parse(lineData[2]);
             
             nodes.Add(new(id, new Coordinate(x, y)));
         }

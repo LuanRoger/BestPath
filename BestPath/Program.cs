@@ -102,8 +102,8 @@ async Task RunAlgos(ProgressContext context, bool runAlgoSync)
     try
     {
         TimeSpan cancelationTime = TimeSpan.FromMinutes(15);
-        const int factor = 4;
-        cancelationTime = runAlgoSync ? cancelationTime.Multiply(factor) : cancelationTime;
+        const int timeFactor = 4;
+        cancelationTime = runAlgoSync ? cancelationTime.Multiply(timeFactor) : cancelationTime;
         cancellationTokenSource.CancelAfter(cancelationTime);
         
         if(runAlgoSync)
@@ -138,17 +138,20 @@ async Task RunAlgos(ProgressContext context, bool runAlgoSync)
     async Task RunAStarGraphAlgo(AStarGraph graph, ProgressTask progress)
     {
         graph.OnFinish += Finish;
+        graph.Heuristic(new HaversineHeuristic());
+        AnsiConsole.MarkupLine("[blue]Iniciando a heuristica de Haversine[/]");
         IResultSnapshot flatEarthResult = graph.RunAlgo(startNodeId, goalNodeId);
         results.Add(flatEarthResult);
         progress.Increment(30);
-        AnsiConsole.MarkupLine("[springgreen1]Heuristica da terra-plana concluida[/]");
+        AnsiConsole.MarkupLine("[springgreen1]Heuristica da Haversine concluida[/]");
         
         AnsiConsole.MarkupLine("[cyan]Reiniciando grafo...[/]");
-        graph = await graphParser.ParseToAStarGraph();
+        graph.CleanResult();
+        graph = await graphParser.ParseToAStarGraph(false);
+        graph.OnFinish += Finish;
         
         progress.Increment(20);
-        graph.Heuristic(new HaversineHeuristic());
-        AnsiConsole.MarkupLine("[blue]Iniciando a heuristica de Haversine[/]");
+        AnsiConsole.MarkupLine("[blue]Iniciando a heuristica da terra-plana[/]");
         IResultSnapshot haversineResult = graph.RunAlgo(startNodeId, goalNodeId);
         results.Add(haversineResult);
         
