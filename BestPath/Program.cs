@@ -58,8 +58,8 @@ return;
 async IAsyncEnumerable<IAlgorithmGraph> GetGraphsGenerator()
 {
     yield return await graphParser.ParseToAStarGraph();
-    yield return await graphParser.ParseToBfsGraph();
     yield return await graphParser.ParseToUcsGraph();
+    yield return await graphParser.ParseToBfsGraph();
     yield return await graphParser.ParseToDfsGraph();
 }
 
