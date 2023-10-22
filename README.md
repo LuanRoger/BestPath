@@ -71,3 +71,11 @@ Para executar o programa basta executar o seguinte comando na raiz do projeto:
 ```powershell
 dotnet run --project BestPath/BestPath.csproj
 ```
+
+# Análise
+Q: A heurística de Haversine é admisível? Por quê?
+R: Não, pois a heuristica de Haversine não é monotônica para casos que a superfice é plana. Já a euclediana é monotônica para qualquer caso, pois a distancia entre dois pontos é sempre maior ou igual a distancia real entre esses dois pontos e um terceiro ponto.
+Mas usar a heuristica de Haversine pode ser mais eficiente que a euclediana, pois a heuristica de Haversine é mais precisa que a euclediana em superfices não planas, então o algoritimo A* pode encontrar o caminho mais curto mais rapido.
+
+Q: O que você faria para tornar Haversine admisível?
+R: Simplesmente usar ela casos em que ela seja monotônica, ou seja, em superfices não planas.
